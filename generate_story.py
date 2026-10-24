@@ -125,7 +125,6 @@ def select_and_mark_topic(custom_topic: str = "") -> str:
 
 
 def get_candidate_models(client: genai.Client) -> List[str]:
-    """Combines known latest models with dynamically discovered models from your API key."""
     priority = [
         "gemini-3.8-flash",
         "gemini-3.8-flash-lite",
@@ -156,7 +155,6 @@ def generate_story(topic: str, output_path: str = "build/story.json") -> None:
         print(f"[INFO] Candidate models queue: {candidate_models[:8]}")
 
         for model_name in candidate_models:
-            # Retry up to 3 times if a model hits 503 UNAVAILABLE (temporary demand spike)
             for attempt in range(1, 4):
                 try:
                     print(f"[INFO] Requesting script from {model_name} (Attempt {attempt}/3)...")
@@ -181,7 +179,6 @@ def generate_story(topic: str, output_path: str = "build/story.json") -> None:
                         print(f"[INFO] Waiting {wait_s}s for demand spike to clear...")
                         time.sleep(wait_s)
                     else:
-                        # 404 or unsupported model -> immediately try next model in list
                         break
             if story_dict is not None:
                 break
