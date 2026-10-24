@@ -1,10 +1,4 @@
 #!/usr/bin/env python3
-"""
-send_telegram.py
-Pushes the rendered output/fenrion_short.mp4 and formatted Facebook Reels caption
-directly to a Telegram chat or channel via the Telegram Bot HTTP API.
-"""
-
 import os
 import sys
 import html
@@ -13,7 +7,6 @@ import requests
 
 
 def clean_secret(raw_val: str) -> str:
-    """Strips all whitespace, newlines, quotes, and accidental 'bot' prefix."""
     cleaned = "".join(raw_val.split()).strip("'\"")
     if cleaned.lower().startswith("bot") and ":" in cleaned:
         cleaned = cleaned[3:]
