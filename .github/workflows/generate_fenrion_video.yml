@@ -71,3 +71,12 @@ jobs:
           git add topics.json
           git diff --staged --quiet || git commit -m "chore(queue): mark topic as used [skip ci]"
           git push
+- name: 4. Upload MP4 as GitHub Workflow Artifact (Backup)
+     if: always()
+     uses: actions/upload-artifact@v4
+     with:
+       name: fenrion-short-${{ github.run_id }}
+       path: |
+         output/fenrion_short.mp4
+         build/story.json
+       retention-days: 7
