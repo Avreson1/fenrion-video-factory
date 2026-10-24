@@ -38,7 +38,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt Pillow
 
-      - name: 1. Generate Script & Prompts (Google AI Studio - Gemini 2.5 Flash)
+      - name: 1. Generate Script & Prompts (Google AI Studio)
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
@@ -56,6 +56,7 @@ jobs:
           python send_telegram.py
 
       - name: 4. Upload MP4 as GitHub Workflow Artifact (Backup)
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: fenrion-short-${{ github.run_id }}
@@ -65,18 +66,10 @@ jobs:
           retention-days: 7
 
       - name: 5. Commit Updated topics.json State Back to Repository
+        if: success()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add topics.json
           git diff --staged --quiet || git commit -m "chore(queue): mark topic as used [skip ci]"
           git push
-- name: 4. Upload MP4 as GitHub Workflow Artifact (Backup)
-     if: always()
-     uses: actions/upload-artifact@v4
-     with:
-       name: fenrion-short-${{ github.run_id }}
-       path: |
-         output/fenrion_short.mp4
-         build/story.json
-       retention-days: 7
