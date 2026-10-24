@@ -2,7 +2,7 @@
 """
 generate_story.py
 Generates a 6-scene Fenrion-style military history / espionage script, visual prompts,
-and Facebook Reels caption using Google AI Studio (gemini-2.5-flash) with Pydantic structured outputs.
+and Facebook Reels caption using Google AI Studio (gemini-3.8-flash) with Pydantic structured outputs.
 """
 
 import os
@@ -97,22 +97,40 @@ def generate_story(topic: str, output_path: str = "build/story.json") -> None:
         sys.exit(1)
 
     client = genai.Client(api_key=api_key)
-    print(f"[INFO] Requesting structured Fenrion script from gemini-2.5-flash...")
 
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=f"Write a 6-scene Fenrion documentary script about: {topic}",
-        config=types.GenerateContentConfig(
-            system_instruction=SYSTEM_PROMPT,
-            response_mime_type="application/json",
-            response_schema=FenrionStory,
-            temperature=0.7,
-        ),
-    )
+    candidate_models = [
+        "gemini-3.8-flash",
+        "gemini-3.0-flash",
+        "gemini-2.5-pro",
+        "gemini-flash-latest",
+    ]
+
+    response = None
+    last_err = None
+    for model_name in candidate_models:
+        try:
+            print(f"[INFO] Requesting structured Fenrion script from {model_name}...")
+            response = client.models.generate_content(
+                model=model_name,
+                contents=f"Write a 6-scene Fenrion documentary script about: {topic}",
+                config=types.GenerateContentConfig(
+                    system_instruction=SYSTEM_PROMPT,
+                    response_mime_type="application/json",
+                    response_schema=FenrionStory,
+                    temperature=0.7,
+                ),
+            )
+            print(f"[INFO] Successfully generated script with {model_name}!")
+            break
+        except Exception as exc:
+            print(f"[WARN] Model {model_name} failed: {exc}")
+            last_err = exc
+
+    if response is None:
+        raise RuntimeError(f"All candidate Gemini models failed. Last error: {last_err}")
 
     story_dict = json.loads(response.text)
 
-    # Validate scene count & enforce sign-off safety check
     scenes = story_dict.get("scenes", [])
     if len(scenes) != 6:
         raise RuntimeError(f"Expected 6 scenes from Gemini, got {len(scenes)}")
