@@ -9,7 +9,7 @@ import requests
 def send_video_to_telegram(
     story_path: str = "build/story.json",
     video_path: str = "output/fenrion_short.mp4",
-) -> None:
+)bot_token = "".join(os.environ.get("TELEGRAM_BOT_TOKEN", "").split())
     bot_token = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
     if bot_token.startswith("bot"):
         bot_token = bot_token[3:]
